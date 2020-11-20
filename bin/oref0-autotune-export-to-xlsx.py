@@ -13,6 +13,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from __future__ import print_function
 import json
 import glob, os, sys
 
@@ -20,7 +21,7 @@ import glob, os, sys
 try:
     import xlsxwriter
 except:
-    print "This software requires XlsxWriter package. Install it with 'sudo pip install XlsxWriter', see http://xlsxwriter.readthedocs.io/"
+    print("This software requires XlsxWriter package. Install it with 'sudo pip install XlsxWriter', see http://xlsxwriter.readthedocs.io/")
     sys.exit(1)
 
 import datetime
@@ -49,7 +50,7 @@ def expandProfile(l, valueField, offsetField):
         minutes1=calc_minutes(start1)
         offset1=l[i][offsetField]
         if minutes1!=offset1:
-            print "Error in JSON offSetField %s contains %s does not match start time %s (%d minutes). Please report this as a bug" % (offsetField, offset1, start1, minutes1) 
+            print("Error in JSON offSetField %s contains %s does not match start time %s (%d minutes). Please report this as a bug" % (offsetField, offset1, start1, minutes1))
             sys.exit(1)
         while (minutes<minutes1):
             r.append(value)
@@ -81,7 +82,7 @@ def write_profile(worksheet, row, json, excel_number_format):
     col=3
     value=""
     for i in PROFILE_FIELDS:
-        if json.has_key(i):
+        if i in json:
            worksheet.write_number(row, col, json[i], excel_number_format)
         col=col+1
     
@@ -155,30 +156,37 @@ PROFILE_FIELDS=['max_iob', 'carb_ratio', 'csf', 'max_basal', 'sens']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Export oref0 autotune files to Microsoft Excel')
-    parser.add_argument('-d', '--dir', help='autotune directory', default='.')
+    parser.add_argument('-d', '--dir', help='openaps directory', default='.')
     parser.add_argument('-o', '--output', help='default autotune.xlsx', default='autotune.xlsx')
-    parser.add_argument('--version', action='version', version='%(prog)s 0.0.3-dev')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.0.4-dev')
     args = parser.parse_args()
 
     # change to openaps directory
     os.chdir(args.dir)
 
-    print "Writing headers to Microsoft Excel file %s" % args.output
+    print("Writing headers to Microsoft Excel file %s" % args.output)
     workbook = xlsxwriter.Workbook(args.output)
     (worksheetProfile,worksheetBasal, worksheetIsf,excel_2decimals_format,excel_integer_format)=excel_init_workbook(workbook)
     row=1 # start on second row, row=0 is for headers
     filenamelist=sortedFilenames()
     for filename in filenamelist:
         f=open(filename, 'r')
-        print "Adding %s to Excel" % filename
+        print("Adding %s to Excel" % filename)
         j=json.load(f)
-        basalProfile=j['basalprofile']
-        isfProfile=j['isfProfile']['sensitivities']
-        expandedBasal=expandProfile(basalProfile, 'rate', 'minutes')
-        expandedIsf=expandProfile(isfProfile, 'sensitivity', 'offset')
-        write_timebased_profile(worksheetBasal, row, expandedBasal, excel_2decimals_format)
-        write_timebased_profile(worksheetIsf, row, expandedIsf, excel_integer_format)
-        write_profile(worksheetProfile, row, j, excel_integer_format)	
-        row=row+1
+        try:
+            basalProfile=j['basalprofile']
+            isfProfile=j['isfProfile']['sensitivities']
+            expandedBasal=expandProfile(basalProfile, 'rate', 'minutes')
+            expandedIsf=expandProfile(isfProfile, 'sensitivity', 'offset')
+            write_timebased_profile(worksheetBasal, row, expandedBasal, excel_2decimals_format)
+            write_timebased_profile(worksheetIsf, row, expandedIsf, excel_integer_format)
+            write_profile(worksheetProfile, row, j, excel_integer_format)	
+            row=row+1
+        except Exception as e:
+            if 'error' in j:
+               print("Skipping file. Error: %s " % j['error'])
+            else:
+               print("Skipping file. Exception: %s" % e)
+                
     workbook.close()  
-    print "Written %d lines to Excel" % row
+    print("Written %d lines to Excel" % row)

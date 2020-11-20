@@ -1,13 +1,27 @@
 [
-  {
+ {
     "type": "report",
-    "name": "monitor/cgm-glucose.json",
-    "monitor/cgm-glucose.json": {
-      "hours": "25.0",
-      "device": "cgm",
-      "use": "iter_glucose_hours",
-      "reporter": "JSON"
-    }
+    "settings/temptargets.json": {
+      "oper": "temp_targets",
+      "use": "shell",
+      "reporter": "JSON",
+      "device": "ns",
+      "remainder": "-18hours",
+      "json_default": "True"
+    },
+    "name": "settings/temptargets.json"
+  },
+ {
+    "type": "report",
+    "monitor/carbhistory.json": {
+      "oper": "carb_history",
+      "use": "shell",
+      "reporter": "JSON",
+      "device": "ns",
+      "remainder": "-36hours",
+      "json_default": "True"
+    },
+    "name": "monitor/carbhistory.json"
   },
   {
     "type": "report",
@@ -27,18 +41,6 @@
       "date": "display_time",
       "glucose": ""
     }
-  },
-  {
-    "cgm/ns-glucose.json": {
-      "oper": "oref0_glucose_since",
-      "use": "shell",
-      "reporter": "JSON",
-      "device": "ns",
-      "remainder": "-24hours",
-      "json_default": "True"
-    },
-    "type": "report",
-    "name": "cgm/ns-glucose.json"
   },
   {
     "type": "report",
@@ -135,7 +137,7 @@
     "type": "report",
     "name": "monitor/pumphistory.json",
     "monitor/pumphistory.json": {
-      "hours": "5.0",
+      "hours": "2.0",
       "device": "pump",
       "use": "iter_pump_hours",
       "reporter": "JSON"
@@ -188,9 +190,9 @@
       "clock": "monitor/clock-zoned.json",
       "reporter": "text",
       "json_default": "True",
-      "pumphistory": "monitor/pumphistory-zoned.json",
+      "pumphistory": "monitor/pumphistory-merged.json",
       "device": "iob",
-      "remainder": ""
+      "remainder": "settings/autosens.json"
     }
   },
   {
@@ -203,7 +205,7 @@
       "reporter": "text",
       "json_default": "True",
       "use": "shell",
-      "pumphistory": "monitor/pumphistory-zoned.json",
+      "pumphistory": "monitor/pumphistory-merged.json",
       "carbs": "monitor/carbhistory.json",
       "device": "meal",
       "remainder": "",
@@ -220,7 +222,7 @@
       "json_default": "True",
       "pumphistory": "settings/pumphistory-24h-zoned.json",
       "device": "detect-sensitivity",
-      "remainder": "",
+      "remainder": "monitor/carbhistory.json settings/temptargets.json",
       "isf": "settings/insulin_sensitivities.json",
       "glucose": "monitor/glucose.json"
     },
@@ -294,23 +296,6 @@
   },
   {
     "type": "report",
-    "name": "enact/suggested.json",
-    "enact/suggested.json": {
-      "profile": "settings/profile.json",
-      "use": "shell",
-      "temp_basal": "monitor/temp_basal.json",
-      "reporter": "text",
-      "json_default": "True",
-      "meal": "monitor/meal.json",
-      "autosens": "settings/autosens.json",
-      "device": "determine-basal",
-      "remainder": "",
-      "iob": "monitor/iob.json",
-      "glucose": "monitor/glucose.json"
-    }
-  },
-  {
-    "type": "report",
     "enact/enacted.json": {
       "device": "pump",
       "input": "enact/suggested.json",
@@ -358,12 +343,12 @@
   {
     "type": "report",
     "name": "xdrip/glucose.json",
-    "xdrip/glucose.json": {      
-      "device": "xdrip",
-	    "remainder": "",	  
-      "use": "shell",
+    "xdrip/glucose.json": {
+        "device": "xdrip",
+        "remainder": "",
+        "use": "shell",
 	    "json_default": "True",
-      "reporter": "text"
+        "reporter": "text"
     }
   }
 ]

@@ -9,19 +9,6 @@
     "extra": {}
   },
   {
-    "ns-glucose": {
-      "vendor": "openaps.vendors.process",
-      "extra": "ns-glucose.ini"
-    },
-    "type": "device",
-    "name": "ns-glucose",
-    "extra": {
-      "fields": "",
-      "cmd": "bash -c \"curl -m 30 -s $NIGHTSCOUT_HOST/api/v1/entries/sgv.json?count=1000 | json -e \\\"this.glucose = this.sgv\\\"\"",
-      "args": ""
-    }
-  },
-  {
     "extra": {
       "fields": "",
       "cmd": "oref0",
@@ -87,19 +74,6 @@
     }
   },
   {
-    "determine-basal": {
-      "vendor": "openaps.vendors.process",
-      "extra": "determine-basal.ini"
-    },
-    "type": "device",
-    "name": "determine-basal",
-    "extra": {
-      "fields": "iob temp_basal glucose profile",
-      "cmd": "oref0",
-      "args": "determine-basal"
-    }
-  },
-  {
     "pebble": {
       "vendor": "openaps.vendors.process",
       "extra": "pebble.ini"
@@ -150,7 +124,7 @@
     "name": "xdrip",
     "extra": {
       "fields": "",
-      "cmd": "bash -c \"curl -s http://localhost:5000/api/v1/entries?count=288 | json -e \\\"this.glucose = this.sgv\\\"\"",
+      "cmd": "bash -c \"curl --compressed -s http://localhost:5000/api/v1/entries?count=288 | json -e \\\"this.glucose = this.sgv\\\"\"",
       "args": ""
     }
   }

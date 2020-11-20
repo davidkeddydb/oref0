@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Delete git lock / history if necessary to recover from corrupted .git objects
 #
@@ -13,23 +13,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+source $(dirname $0)/oref0-bash-common-functions.sh || (echo "ERROR: Failed to run oref0-bash-common-functions.sh. Is oref0 correctly installed?"; exit 1)
+
 # must be run from within a git repo to do anything useful
-self=$(basename $0)
-#BACKUP_AREA=${1-${BACKUP_AREA-/var/cache/openaps-ruination}}
-function usage ( ) {
+BACKUP_AREA=${1-${BACKUP_AREA-/var/cache/openaps-ruination}}
 
-cat <<EOF
-$self
-$self - Check if git commit history is longer than 5000 commits, and truncate to 2000 if so.
+usage "$@" <<EOF
+Usage: $self
+Check if git commit history is longer than 5000 commits, and re-initialize .git if so.
 EOF
-}
 
-case "$1" in
-  --help|help|-h)
-    usage
-    exit 0
-    ;;
-esac
+test ! -d $BACKUP_AREA && BACKUP_AREA=/tmp
+BACKUP="$BACKUP_AREA/git-$(epochtime_now)"
 
 # remove old lockfile if still present
 find .git/index.lock -mmin +60 -exec rm {} \; 2>/dev/null
@@ -37,12 +32,13 @@ find .git/refs/heads/master.lock -mmin +60 -exec rm {} \; 2>/dev/null
 
 commits=$(git log | grep -c commit)
 if (( $commits > 5000 )); then
-    echo "Found $commits commits; truncating git history"
-    git commit -m"save unsaved changes" -a 
-    du -sh .git && git rev-parse HEAD~2000 > .git/info/grafts && git filter-branch -- --all
-    rm .git/info/grafts
-    git update-ref -d refs/original/refs/heads/master && git reflog expire --expire=now --all && git gc --prune=now --aggressive 
-fi 
+    echo "Found $commits commits; re-initializing .git"
+    echo "Saving backup to: $BACKUP" > /dev/stderr
+    mv .git $BACKUP
+    rm -rf .git
+    openaps init .
+fi
+
 commits=$(git log | grep -c commit)
 usage=$(du -sh .git | awk '{print $1}')
 oldest=$(git log | grep Date | tail -1)

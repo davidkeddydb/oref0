@@ -21,7 +21,7 @@ describe('Profile', function ( ) {
         ]
         , isf: {
             sensitivities: [
-                { offset: 0, i: 0, x: 0, start: '00:00:00', sensitivity: 100 }
+                { offset: 0, sensitivity: 100 }
             ]
         }
         , carbratio: {
@@ -34,30 +34,6 @@ describe('Profile', function ( ) {
 
     it('should should create a profile from inputs', function () {
         var profile = require('../lib/profile')(baseInputs);
-        profile.max_iob.should.equal(0);
-        profile.dia.should.equal(3);
-        profile.sens.should.equal(100);
-        profile.current_basal.should.equal(1);
-        profile.max_bg.should.equal(120);
-        profile.min_bg.should.equal(100);
-        profile.carb_ratio.should.equal(20);
-    });
-
-    it('should adjust carbratio with carbratio_adjustmentratio', function () {
-
-        var profile = require('../lib/profile')(baseInputs);
-        profile.carb_ratio.should.equal(20);
-
-        var profileA = require('../lib/profile')(_.merge({}, baseInputs, {
-            carbratio_adjustmentratio: .8
-        }));
-        profileA.carb_ratio.should.equal(16);
-
-    });
-
-
-    it('should should honour override_high_target_with_low', function () {
-        var profile = require('../lib/profile')(_.merge({}, baseInputs, {override_high_target_with_low: true}));
         profile.max_iob.should.equal(0);
         profile.dia.should.equal(3);
         profile.sens.should.equal(100);
@@ -91,7 +67,7 @@ describe('Profile', function ( ) {
         profile.dia.should.equal(3);
         profile.sens.should.equal(100);
         profile.current_basal.should.equal(1);
-        profile.max_bg.should.equal(120);
+        profile.max_bg.should.equal(100);
         profile.min_bg.should.equal(100);
         profile.carb_ratio.should.equal(20);
     });
@@ -102,7 +78,7 @@ describe('Profile', function ( ) {
         profile.dia.should.equal(3);
         profile.sens.should.equal(100);
         profile.current_basal.should.equal(1);
-        profile.max_bg.should.equal(120);
+        profile.max_bg.should.equal(100);
         profile.min_bg.should.equal(100);
         profile.carb_ratio.should.equal(20);
     });
